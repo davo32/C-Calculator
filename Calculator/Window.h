@@ -12,7 +12,6 @@ public:
 	bool startup();
 	bool update();
 	void draw();
-	void SetupDockspace(ImGuiIO& io);
 	void CreateHistoryUI(ImGuiWindowFlags windowFlags);
 	void CreateCalculatorUI(ImGuiWindowFlags windowFlags);
 	void shutdown();
@@ -28,7 +27,6 @@ private:
 	//ImGuiID dockspaceID;
 
 	Calculator calculator;
-	char expression[256] = "0";
 
 	ImFont* DefaultFont;
 	ImFont* largerFont;
@@ -41,10 +39,11 @@ private:
 		| ImGuiWindowFlags_NoMove
 		| ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoBringToFrontOnFocus
-		| ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoScrollWithMouse
 		| ImGuiWindowFlags_MenuBar;
 
+	ImGuiWindowFlags extraFlags
+		= ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoScrollWithMouse;
 	
 };
 

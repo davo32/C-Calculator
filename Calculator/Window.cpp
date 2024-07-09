@@ -88,7 +88,7 @@ void Window::draw()
 	ImGui::NewFrame();
 
 	CreateHistoryUI(windowFlags);
-	CreateCalculatorUI(windowFlags);
+	CreateCalculatorUI(windowFlags | extraFlags);
 	
 
 	ImGui::Render();
@@ -110,7 +110,10 @@ void Window::CreateHistoryUI(ImGuiWindowFlags windowFlags)
 	if (ImGui::Begin("History", (bool*)1, windowFlags))
 	{
 		ImGui::Text("History");
-		//ImGui::Text("%s", calculator.GetRollingEquation().c_str());
+		calculator.History.Display([this](int index)
+			{
+				this->calculator.RevertToHistory(index);
+			});
 	}
 	ImGui::End();
 
@@ -134,160 +137,124 @@ void Window::CreateCalculatorUI(ImGuiWindowFlags windowFlags)
 		{
 			if (ImGui::MenuItem("About"))
 			{
+				ImGui::OpenPopup("About", ImGuiPopupFlags_None);
 				
 			}
+
+			if (ImGui::BeginPopup("About"))
+			{
+				ImGui::Text("Developed by David Shannon");
+				if (ImGui::Button("Close", ImVec2(40, 20)))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
+
 			ImGui::Text("            |          ");
 			if (ImGui::MenuItem("Clear History"))
 			{
 				//Clear History...
+				calculator.History.history.clear();
 			}
 			ImGui::EndMainMenuBar();
 		}
 
 		
-		//ImGuiIO& io = ImGui::GetIO();
-		
 		ImGui::PushFont(largerFont);
 		ImVec2 ISize(200, 27);
 		ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll;
-		ImGui::InputTextMultiline("##Expression", expression, sizeof(expression),ISize,flags);
+		ImGui::InputTextMultiline("##Expression", calculator.expression, sizeof(calculator.expression),ISize,flags);
 
 		ImGui::PopFont();
-
+		//Clear All
 		if (ImGui::Button("C", ButtonSize))
 		{
-			snprintf(expression, sizeof(expression), "%d", 0);
+			snprintf(calculator.expression, sizeof(calculator.expression), "%d", 0);
 		}
 		ImGui::SameLine();
+		//Clear Entry
 		if (ImGui::Button("CE", ButtonSize))
 		{
-			snprintf(expression, sizeof(expression), "%d", 0);
+			snprintf(calculator.expression, sizeof(calculator.expression), "%d", 0);
 		}
 		ImGui::SameLine();
+		//Backspace
 		if (ImGui::Button("Bs", ButtonSize))
 		{
-			size_t length = strlen(expression);
+			size_t length = strlen(calculator.expression);
 
 			if (length > 0)
 			{
-				expression[length - 1] = '\0';
+				calculator.expression[length - 1] = '\0';
 			}
 		}
 
 		// Number buttons
 		for (int i = 1; i <= 9; ++i) {
+			//Numbers
 			if (ImGui::Button(std::to_string(i).c_str(), ButtonSize))
 			{
-				if (expression[0] == '0')
+				if (calculator.expression[0] == '0')
 				{
-					snprintf(expression,sizeof(expression), "%i", i);
+					snprintf(calculator.expression,sizeof(calculator.expression), "%i", i);
 				}
 				else
 				{
-					strcat_s(expression, std::to_string(i).c_str());
+					strcat_s(calculator.expression, std::to_string(i).c_str());
 				}
 				
 			}
 			if (i % 3 != 0) ImGui::SameLine();
 			if (i == 3) 
 			{ 
-				ImGui::SameLine();  
-				if (ImGui::Button("*", ButtonSize))
-				{
-					//strcat_s(expression, "*");
-					char* temp;
-					calculator.first = strtod(expression, &temp);
-					snprintf(expression, sizeof(expression), "%s", "");
-					calculator.operators = "*";
-					std::cout << calculator.first << std::endl;
-					//delete temp;
-				}
+				ImGui::SameLine(); 
+				//Multiply
+				calculator.OperatorButton("*", ButtonSize);
 			}
 			else if (i == 6)
 			{
 				ImGui::SameLine();
-				if (ImGui::Button("/", ButtonSize))
-				{
-					//strcat_s(expression, "/");
-					char* temp;
-					calculator.first = strtod(expression, &temp);
-					snprintf(expression, sizeof(expression), "%s", "");
-					calculator.operators = "/";
-					//delete temp;
-				}
+				//Divide
+				calculator.OperatorButton("/", ButtonSize);
 			}
 			else if (i == 9)
 			{
 				ImGui::SameLine();
+				//Decimal
 				if (ImGui::Button(".", ButtonSize))
 				{
 					char target = '.';
-					char* found = strchr(expression, target);
+					char* found = strchr(calculator.expression, target);
 
 					if (found == nullptr)
 					{
-						strcat_s(expression, ".");
+						strcat_s(calculator.expression, ".");
 					}
 				}
 			}
 		}
 
-
-		if (ImGui::Button("+", ButtonSize))
-		{
-			//strcat_s(expression, "+");
-			char* temp;
-			calculator.first = strtod(expression, &temp);
-			snprintf(expression, sizeof(expression), "%s", "");
-			calculator.operators = "+";
-			//delete temp;
-		}
+		//Plus
+		calculator.OperatorButton("+", ButtonSize);
 		ImGui::SameLine();
-		// Zero button
+
+		// Zero
 		if (ImGui::Button("0", ButtonSize)) 
 		{
-			strcat_s(expression, "0");
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("-", ButtonSize))
-		{
-			//strcat_s(expression, "-");
-			char* temp;
-			calculator.first = strtod(expression, &temp);
-			snprintf(expression, sizeof(expression), "%s", "");
-			calculator.operators = "-";
-			//delete temp;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("=", ButtonSize))
-		{
-			char* temp;
-			calculator.second = strtod(expression, &temp);
-			std::cout << calculator.second << std::endl;
-
-			if (calculator.operators == "+")
-			{
-				calculator.result = calculator.first + calculator.second;
-				snprintf(expression, sizeof(expression), "%f", calculator.result);
-			}
-			else if (calculator.operators == "-")
-			{
-				calculator.result = calculator.first - calculator.second;
-				snprintf(expression, sizeof(expression), "%f", calculator.result);
-			}
-			else if (calculator.operators == "*")
-			{
-				calculator.result = calculator.first * calculator.second;
-				snprintf(expression, sizeof(expression), "%f", calculator.result);
-			}
-			else if (calculator.operators == "/")
-			{
-				calculator.result = calculator.first / calculator.second;
-				snprintf(expression, sizeof(expression), "%f", calculator.result);
-			}
-			std::cout << calculator.result << std::endl;
+			strcat_s(calculator.expression, "0");
 		}
 
+		ImGui::SameLine();
+
+		//Minus
+		calculator.OperatorButton("-", ButtonSize);
+
+		ImGui::SameLine();
+
+		//Equals
+		calculator.EqualsOperatorButton("=", ButtonSize);
 
 		ImGui::End();
 	}
