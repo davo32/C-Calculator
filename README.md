@@ -1,4 +1,4 @@
-**Calculator App with ImGui and C++**
+#**Calculator App with ImGui and C++**
 *This calculator app is a project developed using ImGui and C++. It includes features such as history tracking and equation reverting, making it a versatile tool for basic calculations with a user-friendly interface.*
 
 **Features**
