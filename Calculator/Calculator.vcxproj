@@ -134,7 +134,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Dep/glfw/include;$(SolutionDir)Dep/imguidocking;$(SolutionDir)Dep/imguidocking/backends;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dep/glfw/lib-vc2022;</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -152,7 +152,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Dep/glfw/include;$(SolutionDir)Dep/imguidocking;$(SolutionDir)Dep/imguidocking/backends;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>

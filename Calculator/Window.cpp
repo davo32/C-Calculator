@@ -196,13 +196,24 @@ void Window::CreateCalculatorUI(ImGuiWindowFlags windowFlags)
 			//Numbers
 			if (ImGui::Button(std::to_string(i).c_str(), ButtonSize))
 			{
-				if (calculator.expression[0] == '0')
+				std::string currentExpression(calculator.expression);
+
+				// Check if the expression is empty or contains only a single '0'
+				if (currentExpression.empty() || (currentExpression.length() == 1 && currentExpression[0] == '0'))
 				{
-					snprintf(calculator.expression,sizeof(calculator.expression), "%i", i);
+					// Replace '0' with the current number or start with the number
+					snprintf(calculator.expression, sizeof(calculator.expression), "%i", i);
 				}
 				else
 				{
-					strcat_s(calculator.expression, std::to_string(i).c_str());
+					// Append the number to the existing expression
+					std::string newExpression = currentExpression + std::to_string(i);
+
+					// Ensure we don’t overflow the buffer
+					if (newExpression.length() < sizeof(calculator.expression))
+					{
+						snprintf(calculator.expression, sizeof(calculator.expression), "%s", newExpression.c_str());
+					}
 				}
 				
 			}
@@ -225,12 +236,22 @@ void Window::CreateCalculatorUI(ImGuiWindowFlags windowFlags)
 				//Decimal
 				if (ImGui::Button(".", ButtonSize))
 				{
-					char target = '.';
-					char* found = strchr(calculator.expression, target);
+					// Convert char array to std::string for easier manipulation
+					std::string expr(calculator.expression);
 
-					if (found == nullptr)
-					{
-						strcat_s(calculator.expression, ".");
+					// Find the position of the last operator
+					size_t pos = expr.find_last_of("+-*/");
+
+					// Extract the current number part of the expression
+					std::string currentNumber = (pos == std::string::npos) ? expr : expr.substr(pos + 1);
+
+					// Check if the current number already has a decimal point
+					if (currentNumber.find('.') == std::string::npos) {
+						// Append the decimal point to the expression
+						expr += ".";
+
+						// Update the calculator's expression
+						snprintf(calculator.expression, sizeof(calculator.expression), "%s", expr.c_str());
 					}
 				}
 			}
@@ -243,7 +264,10 @@ void Window::CreateCalculatorUI(ImGuiWindowFlags windowFlags)
 		// Zero
 		if (ImGui::Button("0", ButtonSize)) 
 		{
-			strcat_s(calculator.expression, "0");
+			//if (!calculator.expression[0] == '0')
+			//{
+				strcat_s(calculator.expression, "0");
+			//}
 		}
 
 		ImGui::SameLine();

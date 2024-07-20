@@ -8,15 +8,25 @@ void Calculator::OperatorButton(const char* label, ImVec2 ButtonSize)
 {
 	if (ImGui::Button(label, ButtonSize))
 	{
-		char temp[256];
 		char* temp2;
-		
-		//first = removeTrailingZeros(first);
-		
-		
+
+		// Print for debugging
+		std::cout << "Before conversion, expression: '" << expression << "'" << std::endl;
+
+		// Convert expression to float
 		first = strtof(expression, &temp2);
-		snprintf(temp, sizeof(temp), "%.2f", first);
-		std::cout << "First: " << first << std::endl;
+		std::cout << "FIRST: " << first << std::endl;
+
+		// Check if the entire expression was converted
+		if (*temp2 != '\0' && *temp2 != ' ') {
+			std::cerr << "Error: Conversion of expression to float failed or incomplete." << std::endl;
+			first = 0.0; // Handle error or set a default value
+		}
+
+		// Print for debugging
+		std::cout << "After conversion, first operand: " << first << std::endl;
+
+		// Clear expression for the next input
 		snprintf(expression, sizeof(expression), "%s", "");
 		operators = label;
 	}
@@ -31,8 +41,8 @@ void Calculator::EqualsOperatorButton(const char* label, ImVec2 ButtonSize)
 		std::cout << "Before: " << std::to_string(first) << ":" << second << std::endl;
 
 
-		first = removeTrailingZeros(first);
-		second = removeTrailingZeros(second);
+		//first = removeTrailingZeros(first);
+		//second = removeTrailingZeros(second);
 
 
 		std::string expr = formatExpression(first, operators, second);
@@ -73,6 +83,7 @@ void Calculator::EqualsOperatorButton(const char* label, ImVec2 ButtonSize)
 		
 		// Add formatted expression to history
 		History.Add(expression);
+		std::cout << expression << std::endl;
 	}
 }
 
@@ -103,7 +114,7 @@ double Calculator::removeTrailingZeros(double value)
 		}
 	}
 
-	return std::stof(result);
+	return std::stod(result);
 }
 
 std::string Calculator::formatExpression(double first, const std::string& operators, double second) {
